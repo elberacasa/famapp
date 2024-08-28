@@ -3,11 +3,13 @@ import './App.css';
 import TransactionForm from './components/TransactionForm';
 import TransactionList from './components/TransactionList';
 import AccountSummary from './components/AccountSummary';
+import FamilyDebts from './components/FamilyDebts';
+import ChatBot from './components/ChatBot';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
 
 export interface Transaction {
   id: number;
-  amount: number;  // Ensure this is always a number
+  amount: number;
   description: string;
   source: string;
   date: string;
@@ -17,7 +19,9 @@ export interface Transaction {
 const App: React.FC = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isDarkMode, setIsDarkMode] = useState(false);
-  const [activeComponent, setActiveComponent] = useState<'summary' | 'form' | 'list'>('summary');
+  const [activeComponent, setActiveComponent] = useState<'summary' | 'form' | 'list' | 'debts' | 'chat'>('summary');
+  const [categories, setCategories] = useState<string[]>(['Food', 'Transportation', 'Utilities', 'Entertainment', 'Shopping', 'Education', 'Personal Care']);
+  const [sources, setSources] = useState<string[]>(['Cash (USD)', 'Zelle', 'Banco Provincial (VES)']);
 
   useEffect(() => {
     // Add 10 sample transactions
@@ -54,18 +58,28 @@ const App: React.FC = () => {
     setIsDarkMode(prevMode => !prevMode);
   };
 
+  const addCategory = (category: string) => {
+    setCategories([...categories, category]);
+  };
+
+  const addSource = (source: string) => {
+    setSources([...sources, source]);
+  };
+
   return (
     <div className={`App ${isDarkMode ? 'dark' : ''}`}>
       <header>
         <h1>FamApp</h1>
-        <button onClick={toggleDarkMode}>
-          {isDarkMode ? 'Light Mode' : 'Dark Mode'}
+        <button onClick={toggleDarkMode} className="mode-toggle">
+          {isDarkMode ? '☀️' : '🌙'}
         </button>
       </header>
       <nav>
         <button onClick={() => setActiveComponent('summary')}>Summary</button>
         <button onClick={() => setActiveComponent('form')}>Add Transaction</button>
         <button onClick={() => setActiveComponent('list')}>Transactions</button>
+        <button onClick={() => setActiveComponent('debts')}>Family Debts</button>
+        <button onClick={() => setActiveComponent('chat')}>Chat Bot</button>
       </nav>
       <div className="app-container">
         <TransitionGroup>
@@ -76,15 +90,28 @@ const App: React.FC = () => {
           >
             <div className="component-container">
               {activeComponent === 'summary' && <AccountSummary transactions={transactions} isDarkMode={isDarkMode} />}
-              {activeComponent === 'form' && <TransactionForm addTransaction={addTransaction} isDarkMode={isDarkMode} />}
+              {activeComponent === 'form' && (
+                <TransactionForm 
+                  addTransaction={addTransaction} 
+                  isDarkMode={isDarkMode}
+                  categories={categories}
+                  sources={sources}
+                  addCategory={addCategory}
+                  addSource={addSource}
+                />
+              )}
               {activeComponent === 'list' && (
                 <TransactionList 
                   transactions={transactions} 
                   editTransaction={editTransaction}
                   removeTransaction={removeTransaction}
                   isDarkMode={isDarkMode}
+                  categories={categories}
+                  sources={sources}
                 />
               )}
+              {activeComponent === 'debts' && <FamilyDebts isDarkMode={isDarkMode} />}
+              {activeComponent === 'chat' && <ChatBot transactions={transactions} isDarkMode={isDarkMode} />}
             </div>
           </CSSTransition>
         </TransitionGroup>
