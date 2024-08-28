@@ -5,7 +5,9 @@ import TransactionList from './components/TransactionList';
 import AccountSummary from './components/AccountSummary';
 import FamilyDebts from './components/FamilyDebts';
 import ChatBot from './components/ChatBot';
+import Auth from './components/Auth';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
 
 export interface Transaction {
   id: number;
@@ -22,6 +24,7 @@ const App: React.FC = () => {
   const [activeComponent, setActiveComponent] = useState<'summary' | 'form' | 'list' | 'debts' | 'chat'>('summary');
   const [categories, setCategories] = useState<string[]>(['Food', 'Transportation', 'Utilities', 'Entertainment', 'Shopping', 'Education', 'Personal Care']);
   const [sources, setSources] = useState<string[]>(['Cash (USD)', 'Zelle', 'Banco Provincial (VES)']);
+  const [user, setUser] = useState<any | null>(null);
 
   useEffect(() => {
     // Add 10 sample transactions
@@ -38,6 +41,15 @@ const App: React.FC = () => {
       { id: 10, amount: 60.00, description: "Phone bill", source: "Zelle", date: "2023-05-10", category: "Utilities" }
     ];
     setTransactions(sampleTransactions);
+  }, []);
+
+  useEffect(() => {
+    const auth = getAuth();
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+    });
+
+    return () => unsubscribe();
   }, []);
 
   const addTransaction = (transaction: Omit<Transaction, 'id'>) => {
@@ -70,6 +82,7 @@ const App: React.FC = () => {
     <div className={`App ${isDarkMode ? 'dark' : ''}`}>
       <header>
         <h1>FamApp</h1>
+        <Auth user={user} />
         <button onClick={toggleDarkMode} className="mode-toggle">
           {isDarkMode ? '☀️' : '🌙'}
         </button>
