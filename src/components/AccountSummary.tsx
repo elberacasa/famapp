@@ -13,12 +13,27 @@ const AccountSummary: React.FC<Props> = ({ transactions, isDarkMode }) => {
       .reduce((sum, t) => sum + (typeof t.amount === 'number' ? t.amount : 0), 0);
   };
 
+  const sources = ['Cash (USD)', 'Zelle', 'Banco Provincial (VES)'];
+
   return (
     <div className={`account-summary ${isDarkMode ? 'dark' : ''}`}>
       <h2>Account Summary</h2>
-      <p>Cash (USD): ${calculateBalance('Cash (USD)').toFixed(2)}</p>
-      <p>Zelle: ${calculateBalance('Zelle').toFixed(2)}</p>
-      <p>Banco Provincial (VES): ${calculateBalance('Banco Provincial (VES)').toFixed(2)}</p>
+      <table className="summary-table">
+        <thead>
+          <tr>
+            <th>Account</th>
+            <th>Balance</th>
+          </tr>
+        </thead>
+        <tbody>
+          {sources.map((source) => (
+            <tr key={source}>
+              <td>{source}</td>
+              <td>${calculateBalance(source).toFixed(2)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 };
